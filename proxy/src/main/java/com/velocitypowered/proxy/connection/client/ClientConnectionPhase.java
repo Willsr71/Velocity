@@ -1,6 +1,7 @@
 package com.velocitypowered.proxy.connection.client;
 
 import com.velocitypowered.proxy.connection.forge.legacy.LegacyForgeHandshakeClientPhase;
+import com.velocitypowered.proxy.protocol.packet.LoginPluginMessage;
 import com.velocitypowered.proxy.protocol.packet.PluginMessage;
 
 /**
@@ -24,6 +25,22 @@ public interface ClientConnectionPhase {
   default boolean handle(ConnectedPlayer player,
                          ClientPlaySessionHandler handler,
                          PluginMessage message) {
+    return false;
+  }
+
+  /**
+   * Handle a login plugin message in the context of
+   * this phase.
+   *
+   * @param player The player
+   * @param handler The {@link ClientPlaySessionHandler} that is handling
+   *                packets
+   * @param message The message to handle
+   * @return true if handled, false otherwise.
+   */
+  default boolean handle(ConnectedPlayer player,
+      ClientPlaySessionHandler handler,
+      LoginPluginMessage message) {
     return false;
   }
 

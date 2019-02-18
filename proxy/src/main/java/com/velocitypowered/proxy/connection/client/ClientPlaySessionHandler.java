@@ -441,8 +441,9 @@ public class ClientPlaySessionHandler implements MinecraftSessionHandler {
       if (connection != null) {
         PluginMessage pm;
         while ((pm = loginPluginMessages.poll()) != null) {
-          connection.write(pm);
+          connection.delayedWrite(pm);
         }
+        connection.flush();
       }
     }
   }
