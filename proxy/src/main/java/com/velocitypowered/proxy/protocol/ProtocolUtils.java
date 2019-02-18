@@ -3,15 +3,24 @@ package com.velocitypowered.proxy.protocol;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.EndTag;
+import com.flowpowered.nbt.Tag;
+import com.flowpowered.nbt.stream.NBTInputStream;
+import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.util.GameProfile;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.ByteBufUtil;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public enum ProtocolUtils {
   ;
@@ -192,6 +201,32 @@ public enum ProtocolUtils {
       properties.add(new GameProfile.Property(name, value, signature));
     }
     return properties;
+  }
+
+  public static @Nullable Tag<?> readNbt(ByteBuf buf) {
+    int ri = buf.readerIndex();
+    if (buf.readByte() == 0) {
+      return null;
+    }
+
+    buf.readerIndex(ri);
+    try (NBTInputStream is = new NBTInputStream(new ByteBufInputStream(buf), false)) {
+      return is.readTag();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void writeNbt(ByteBuf buf, Tag<?> tag) {
+    if (tag instanceof EndTag) {
+      buf.writeZero(1);
+    } else {
+      try (NBTOutputStream os = new NBTOutputStream(new ByteBufOutputStream(buf), false)) {
+        os.writeTag(tag);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   public enum Direction {

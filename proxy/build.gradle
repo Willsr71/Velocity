@@ -53,6 +53,8 @@ dependencies {
     compile 'net.kyori:event-method-asm:3.0.0'
 
     compile 'com.mojang:brigadier:1.0.15'
+    
+    compile 'com.flowpowered:flow-nbt:1.0.0'
 
     testCompile "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testCompile "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
