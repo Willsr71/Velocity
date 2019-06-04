@@ -16,6 +16,14 @@ public interface PermissionSubject {
   }
 
   /**
+   * Sets the value of {@code permission} to {@code value} for the subject.
+   *
+   * @param permission the permission
+   * @param value the value
+   */
+  void setPermission(final String permission, final Tristate value);
+
+  /**
    * Gets the subjects setting for a particular permission.
    *
    * @param permission the permission

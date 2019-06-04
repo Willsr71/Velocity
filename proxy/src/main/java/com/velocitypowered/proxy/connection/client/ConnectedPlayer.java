@@ -14,7 +14,6 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.PermissionFunction;
 import com.velocitypowered.api.permission.PermissionProvider;
-import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
@@ -35,6 +34,7 @@ import com.velocitypowered.proxy.connection.forge.legacy.LegacyForgeConstants;
 import com.velocitypowered.proxy.connection.util.ConnectionMessages;
 import com.velocitypowered.proxy.connection.util.ConnectionRequestResults;
 import com.velocitypowered.proxy.connection.util.ConnectionRequestResults.Impl;
+import com.velocitypowered.proxy.permission.AbstractPermissionSubject;
 import com.velocitypowered.proxy.protocol.StateRegistry;
 import com.velocitypowered.proxy.protocol.packet.Chat;
 import com.velocitypowered.proxy.protocol.packet.ClientSettings;
@@ -70,7 +70,7 @@ import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
+public class ConnectedPlayer extends AbstractPermissionSubject implements MinecraftConnectionAssociation, Player {
 
   private static final int MAX_PLUGIN_CHANNELS = 1024;
   private static final PlainComponentSerializer PASS_THRU_TRANSLATE = new PlainComponentSerializer(
@@ -85,7 +85,6 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
   private final MinecraftConnection minecraftConnection;
   private final @Nullable InetSocketAddress virtualHost;
   private GameProfile profile;
-  private PermissionFunction permissionFunction;
   private int tryIndex = 0;
   private long ping = -1;
   private @Nullable VelocityServerConnection connectedServer;
@@ -101,12 +100,12 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
 
   ConnectedPlayer(VelocityServer server, GameProfile profile,
       MinecraftConnection minecraftConnection, @Nullable InetSocketAddress virtualHost) {
+    super(PermissionFunction.ALWAYS_UNDEFINED);
     this.server = server;
     this.tabList = new VelocityTabList(minecraftConnection);
     this.profile = profile;
     this.minecraftConnection = minecraftConnection;
     this.virtualHost = virtualHost;
-    this.permissionFunction = PermissionFunction.ALWAYS_UNDEFINED;
     this.connectionPhase = minecraftConnection.getType().getInitialClientPhase();
     this.knownChannels = CappedSet.create(MAX_PLUGIN_CHANNELS);
   }
@@ -563,11 +562,6 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
   @Override
   public String toString() {
     return "[connected player] " + profile.getName() + " (" + getRemoteAddress() + ")";
-  }
-
-  @Override
-  public Tristate getPermissionValue(String permission) {
-    return permissionFunction.getPermissionValue(permission);
   }
 
   @Override
