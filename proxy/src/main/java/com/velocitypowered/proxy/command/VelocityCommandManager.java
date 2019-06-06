@@ -6,18 +6,23 @@ import com.google.common.collect.ImmutableSet;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandSource;
-import java.util.ArrayList;
+import com.velocitypowered.api.event.command.CommandExecuteEvent;
+import com.velocitypowered.api.proxy.ProxyServer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class VelocityCommandManager implements CommandManager {
 
   private final Map<String, Command> commands = new HashMap<>();
+  private final ProxyServer server;
+
+  public VelocityCommandManager(ProxyServer server) {
+    this.server = server;
+  }
 
   @Override
   public void register(final Command command, final String... aliases) {
@@ -59,7 +64,14 @@ public class VelocityCommandManager implements CommandManager {
         return false;
       }
 
-      command.execute(source, actualArgs);
+      CommandExecuteEvent event = new CommandExecuteEvent(source, cmdLine);
+      server.getEventManager().fire(event)
+              .thenAcceptAsync(cee -> {
+                CommandExecuteEvent.CommandResult commandResult = cee.getResult();
+                if (commandResult.isAllowed()) {
+                  command.execute(source, actualArgs);
+                }
+              });
       return true;
     } catch (Exception e) {
       throw new RuntimeException("Unable to invoke command " + cmdLine + " for " + source, e);

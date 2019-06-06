@@ -32,11 +32,9 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
 import java.util.UUID;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
@@ -114,15 +112,12 @@ public class ClientPlaySessionHandler implements MinecraftSessionHandler {
     String msg = packet.getMessage();
     if (msg.startsWith("/")) {
       try {
-        if (!server.getCommandManager().execute(player, msg.substring(1))) {
-          return false;
-        }
+        server.getCommandManager().execute(player, msg.substring(1));
       } catch (Exception e) {
         logger.info("Exception occurred while running command for {}", player.getUsername(),
                 e);
         player.sendMessage(
             TextComponent.of("An error occurred while running this command.", TextColor.RED));
-        return true;
       }
     } else {
       PlayerChatEvent event = new PlayerChatEvent(player, msg);
